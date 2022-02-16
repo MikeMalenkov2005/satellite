@@ -5,8 +5,7 @@
 %%
 
 \n		{return ',';}
-\}		{return ",}";}
-[+-*/(),{\[\]]	{return yytext[0];}
+[+-*/(),{}\[\]]	{return yytext[0];}
 [ \t\v\f]	{;}
 
 %%
