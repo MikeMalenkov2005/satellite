@@ -1,4 +1,7 @@
 %{
+#include <stdio.h>
+#include <stdlib.h>
+
 extern yylex();
 %}
 
@@ -19,19 +22,25 @@ extern yylex();
 S : M $
   ;
 
-M : M ','
-  | GVAR '=' O ','
-  | LVAR '=' O ','
-  | GFUN O ','
-  | LFUN O ','
-  | M M
+M : GVAR '=' O
+  | LVAR '=' O
+  | GFUN O
+  | LFUN O
+  | M ',' M
   ;
 
 O : '{' M '}'
-  | '{' M GVAR '=' O '}'
-  | '{' M LVAR '=' O '}'
-  | '{' M GFUN O '}'
-  | '{' M LFUN O '}'
+  | '{' M ',' '}'
   ;
 
 %%
+
+void yyerror(char *msg) {
+	fprintf(stderr, "%s\n",msg);
+	exit(-1);
+}
+
+int main() {
+	yyparse();
+	return 0;
+}
