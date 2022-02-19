@@ -58,6 +58,11 @@ void* tSetK(Table *table, size_t key, void *val) {
 		}
 		node = node -> next;
 	}
+	if (node -> key == key) {
+		void *prev = node -> val;
+		node -> val = val;
+		return prev;
+	}
 	node -> next = newNode(key, val);
 	table -> size++;
 	return NULL;
@@ -78,4 +83,15 @@ void* tSetI(Table *table, size_t index, void *val) {
 	void *prev = node -> val;
 	node -> val = val;
 	return prev;
+}
+
+void* tGetK(Table *table, size_t key) {
+	struct node *node = table -> first;
+	while (node != NULL) {
+		if (node -> key == key) {
+			return node -> val;
+		}
+		node = node -> next;
+	}
+	return NULL;
 }
