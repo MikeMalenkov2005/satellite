@@ -2,17 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct node {
-	size_t key;
-	void *val;
-	struct node *next;
-};
-
-typedef struct table {
-	size_t size;
-	struct node *first;
-} Table;
-
 struct node* newNode(size_t key, void *val) {
 	struct node *node = (struct node*) malloc(sizeof(struct node));
 	node -> key = key;
@@ -24,31 +13,35 @@ struct node* newNode(size_t key, void *val) {
 struct node* freeNode(struct node *node) {
 	struct node *next = node -> next;
 	free((void*)node);
-	return next
+	return next;
 }
 
-Table* newTable() {
-	Table *table = (Table*) malloc(sizeof(Table));
+struct table* newTable() {
+	struct table *table = malloc(sizeof(struct table));
 	table -> size = 0;
-	table -> node = NULL;
+	table -> first = NULL;
+	return table;
 }
 
-void freeTable(Table *table) {
-	struct node *node = table -> first
+void freeTable(struct table *table) {
+	struct node *node = table -> first;
 	free((void*)table);
 	while (node != NULL) {
 		node = freeNode(node);
 	}
 }
 
-void tAdd(Table *table, void *val) {
-	struct node *node = table -> first;
-	while (node -> next != NULL) node = node -> next;
-	node -> next = newNode(0, val);
+void tAdd(struct table *table, void *val) {
+	if (table -> size == 0) table -> first = newNode(0, val);
+	else {
+		struct node *node = table -> first;
+		while (node -> next != NULL) node = node -> next;
+		node -> next = newNode(0, val);
+	}
 	table -> size++;
 }
 
-void* tSetK(Table *table, size_t key, void *val) {
+void* tSetK(struct table *table, size_t key, void *val) {
 	struct node *node = table -> first;
 	while (node -> next != NULL) {
 		if (node -> key == key) {
@@ -68,9 +61,9 @@ void* tSetK(Table *table, size_t key, void *val) {
 	return NULL;
 }
 
-void* tSetI(Table *table, size_t index, void *val) {
+void* tSetI(struct table  *table, size_t index, void *val) {
 	if (index > table -> size) {
-		fprintf(stderr, "Runtime index out of range exception!!!\n");
+		printf("Runtime index out of range exception!!!\n");
 		exit(-1);
 	}
 	else if (index == table -> size) {
@@ -85,7 +78,7 @@ void* tSetI(Table *table, size_t index, void *val) {
 	return prev;
 }
 
-void* tGetK(Table *table, size_t key) {
+void* tGetK(struct table *table, size_t key) {
 	struct node *node = table -> first;
 	while (node != NULL) {
 		if (node -> key == key) {
@@ -94,4 +87,52 @@ void* tGetK(Table *table, size_t key) {
 		node = node -> next;
 	}
 	return NULL;
+}
+
+void* tGetI(struct table *table, size_t index) {
+	if (index >= table -> size) {
+		printf("Runtime index out of range exception!!!\n");
+		exit(-1);
+	}
+	struct node *node = table -> first;
+	for (size_t i = 0; i < index; i++) {
+		node = node -> next;
+	}
+	return node -> val;
+}
+
+void* tPopK(struct table *table, size_t key) {
+	struct node *prev = NULL;
+	struct node *node = table -> first;
+	while (node != NULL) {
+		if (node -> key == key) {
+			void *v = node -> val;
+			if (prev != NULL) prev -> next = node -> next;
+			else table -> first = node -> next;
+			table -> size--;
+			return v;
+		}
+		prev = node;
+		node = node -> next;
+	}
+	return NULL;
+}
+
+void* tPopI(struct table *table, size_t index) {
+	if (index >= table -> size) {
+		printf("Runtime index out of range exception!!!\n");
+		exit(-1);
+	}
+	struct node *prev = NULL;
+	struct node *node = table -> first;
+	for (size_t i = 0; i < index; i++) {
+		prev = node;
+		node = node -> next;
+	}
+	void *v = node -> val;
+	if (prev != NULL) prev -> next = node -> next;
+	else table -> first = node -> next;
+	freeNode(node);
+	table -> size--;
+	return v;
 }
